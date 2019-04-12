@@ -1,9 +1,8 @@
 # MBusParser
-_Conforms to EN 13757-3 and EN 13757-4._
 
-If you want support for more recent standards, feel free to buy me one.
-
-Tested on real-world packets!
+## Features
+ - Conforms to _EN 13757-3_ and _EN 13757-4._ (If you want support for more recent standards, feel free to buy me one.)
+ - Tested on real-world packets!
 
 ## Whats working.
 - Able to parse an unencrypted mbus packet.
@@ -11,6 +10,7 @@ Tested on real-world packets!
 
 ## TODO:
 
+- Handle endianess of the platform where the parser is running.
 - Write tests.
 - Check if wireless mbus header is parsed correctly.
 - Handle decryption (coming soon!)
