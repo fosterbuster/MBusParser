@@ -1,7 +1,7 @@
 # MBusParser
 
 ## Features
- - Conforms to _EN 13757-3_ and _EN 13757-4._ *2013* (If you want support for more recent standards, feel free to buy me one.)
+ - Conforms to _EN 13757-3_ and _EN 13757-4._ **2013** (If you want support for more recent standards, feel free to buy me one.)
  - Tested on real-world packets!
 
 ## Whats working.
