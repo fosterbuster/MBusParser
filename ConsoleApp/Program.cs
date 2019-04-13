@@ -2,6 +2,7 @@
 using MBus;
 using MBus.DataRecord.DataRecordHeader.DataInformationBlock;
 using MBus.Extensions;
+using MBus.Header.ELL;
 
 namespace ConsoleApp
 {
@@ -9,16 +10,17 @@ namespace ConsoleApp
     {
         static void Main(string[] args)
         {
-            var bytes = "08017267440090361CC7020200000004050000000004FB827500000000042A1500000004FB9772E2FFFFFF04FBB7722500000002FDBA73470284808040FD480000000004FD48ED0200008440FD5900000000848040FD590000000084C040FD59100000001F".HexStringToBytes();
-
-            
+            var bytes = "4F442D2C029762691C048D20F941AED921C302B8A76E776A4643C8AD75C1D5CF1D33B4E4D7A8F2FFFED1F4BCF461599B9BA90720771B72ABC2D44187C25E43EEFEDE19F7F5C15B7607E25FE04CABA076AA".HexStringToBytes();
+            var key = "F202CCBA6B72E797740E9692ADDA2B2D".HexStringToBytes();
+            var ss = new SessionNumberField("3186C522".HexStringToBytes());
+            var test = ss.EncryptionScheme;
             var parser = new MBusParser();
 
             while (true)
             {
-                var header = parser.ParseHeader(bytes, true);
+                var header = parser.ParseHeader(bytes);
 
-                var payload = parser.ParsePayload(header, bytes);
+                var payload = parser.ParsePayload(header, bytes, key);
             }
 
             /*
