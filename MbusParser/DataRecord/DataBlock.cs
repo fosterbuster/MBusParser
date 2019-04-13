@@ -139,20 +139,27 @@ namespace MBus.DataRecord
         private double ParseInteger(int multiplier)
         {
             long value = 0;
+            var correctEndianData = _data;
+
+            // MBus is least significant byte first
+            if (BitConverter.IsLittleEndian)
+            {
+                correctEndianData = correctEndianData.Reverse().ToArray();
+            }
 
             switch (DataInformationField.DataField)
             {
                 case DataField.EightBitInteger:
                 case DataField.SixteenBitInteger:
-                    value = BitConverter.ToInt16(_data, 0);
+                    value = BitConverter.ToInt16(correctEndianData, 0);
                     break;
                 case DataField.TwentyFourBitInteger:
                 case DataField.ThirtyTwoBitInteger:
-                    value = BitConverter.ToInt32(_data, 0);
+                    value = BitConverter.ToInt32(correctEndianData, 0);
                     break;
                 case DataField.FourtyEightBitInteger:
                 case DataField.SixtyFourBitInteger:
-                    value = BitConverter.ToInt64(_data, 0);
+                    value = BitConverter.ToInt64(correctEndianData, 0);
                     break;
             }
 

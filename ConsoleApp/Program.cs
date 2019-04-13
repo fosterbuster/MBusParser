@@ -14,14 +14,13 @@ namespace ConsoleApp
             
             var parser = new MBusParser();
 
-            for (byte i = 0; i < 255; i++)
+            while (true)
             {
-                new DataInformationExtensionField(i);
+                var header = parser.ParseHeader(bytes);
+
+                var payload = parser.ParsePayload(header, bytes);
             }
 
-            var header = parser.ParseHeader(bytes);
-
-            var payload = parser.ParsePayload(header, bytes);
         }
     }
 }

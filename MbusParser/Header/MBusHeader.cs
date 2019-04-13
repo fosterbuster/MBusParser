@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using MBus.Extensions;
+using MBus.Header.ELL;
 using MBus.Helpers;
 
 namespace MBus.Header
@@ -20,6 +21,8 @@ namespace MBus.Header
         private const byte WiredMBusStartByte = 0x68;
         private readonly IList<byte> _payload;
 
+        private readonly byte _ciFieldByte;
+
         private (int startIndex, int length) _manufacturerIndexer;
         private (int startIndex, int length) _serialNumberIndexer;
         private (int startIndex, int length) _versionIndexer;
@@ -30,7 +33,7 @@ namespace MBus.Header
         /// Initializes a new instance of the <see cref="MBusHeader"/> class.
         /// </summary>
         /// <param name="payload">the paylod bytes.</param>
-        public MBusHeader(IList<byte> payload)
+        public MBusHeader(IList<byte> payload, bool messageLenghtIsFirstByte = false)
         {
             _payload = payload;
             _controlInformationFieldIndexer = (0, 1);
@@ -46,7 +49,15 @@ namespace MBus.Header
             }
             else
             {
-                BytesBeforeHeader = 6;
+                if (messageLenghtIsFirstByte)
+                {
+                    BytesBeforeHeader = 1;
+                }
+                else
+                {
+                    BytesBeforeHeader = 6;
+                }
+
                 _manufacturerIndexer = (5, 2);
                 _serialNumberIndexer = (1, 4);
                 _versionIndexer = (7, 1);
@@ -54,7 +65,16 @@ namespace MBus.Header
             }
 
             _payload = _payload.Skip(BytesBeforeHeader).ToList();
+            _ciFieldByte = _payload.Skip(_controlInformationFieldIndexer.startIndex).Take(_controlInformationFieldIndexer.length).First();
+
+            if (HeaderType == HeaderType.ExtendedLinkLayer)
+            {
+                // Skips CI-field
+                ExtendedLinkLayer = new ExtendedLinkLayer(_payload.Skip(1).Take(HeaderLength).ToArray());
+            }
         }
+
+        internal ExtendedLinkLayer? ExtendedLinkLayer { get; private set; }
 
         /// <summary>
         /// Gets the manufacturer name.
@@ -77,19 +97,35 @@ namespace MBus.Header
         public MBusTypeCode Type => EnumUtils.GetEnumOrDefault((int)_payload.Skip(_deviceTypeIndexer.startIndex).Take(_deviceTypeIndexer.length).First(), MBusTypeCode.UnknownType);
 
         /// <summary>
-        /// Gets the <see cref="ControlInformation"/>.
+        /// Gets the <see cref="FrameType"/> of the variable data record.
         /// </summary>
-        public ControlInformation ControlInformation => new ControlInformation(_payload.Skip(_controlInformationFieldIndexer.startIndex).Take(_controlInformationFieldIndexer.length).Last());
+        public FrameType FrameType => ControlInformationLookup.Find(_ciFieldByte).frameType;
 
-        internal int HeaderLength => DetermineHeaderLength();
+        /// <summary>
+        /// Gets the <see cref="HeaderType"/> of the <see cref="Header"/>
+        /// </summary>
+        public HeaderType HeaderType => ControlInformationLookup.Find(_ciFieldByte).headerType;
+
+        internal EncryptionScheme EncryptionScheme => GetEncryptionScheme();
+
+        private EncryptionScheme GetEncryptionScheme()
+        {
+            if (ExtendedLinkLayer != null)
+            {
+                return ExtendedLinkLayer.EncryptionScheme;
+            }
+
+
+
+            return EncryptionScheme.NoEncryption;
+        }
+
+        internal int HeaderLength => ControlInformationLookup.HeaderLength(_ciFieldByte);
 
         internal int BytesBeforeHeader { get; private set; }
 
-        private int DetermineHeaderLength()
-        {
-            // TODO Implement support for multiple header types.
-            return 12;
-        }
+        // + 1 is to take the CI-field into account.
+        internal int PayloadStartsAtIndex => BytesBeforeHeader + HeaderLength + 1;
 
         private string GetManufacturerName()
         {
@@ -98,7 +134,7 @@ namespace MBus.Header
 
         private int GetSerialNumber()
         {
-            return int.Parse(_payload.Skip(_serialNumberIndexer.startIndex).Take(_serialNumberIndexer.length).Reverse().ToList().ToHexString());
+            return BitConverter.ToInt32(_payload.Skip(_serialNumberIndexer.startIndex).Take(_serialNumberIndexer.length).Reverse().ToArray());
         }
     }
 }

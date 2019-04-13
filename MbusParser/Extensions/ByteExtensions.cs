@@ -123,11 +123,25 @@ namespace MBus.Extensions
             return (byte)(b << places);
         }
 
+        /// <summary>
+        ///  Gets the the (zero-indexed) bit at <paramref name="bitNumber"/>.
+        /// </summary>
+        /// <param name="b">the byte.</param>
+        /// <param name="bitNumber">the bitnumber.</param>
+        /// <returns>The bit (1 = true, 0 = false).</returns>
+        public static bool GetBit(this byte b, byte bitNumber)
+        {
+            return (b & (1 << bitNumber)) != 0;
+        }
+
         private static int GetHexVal(char hex)
         {
             var val = (int)hex;
-            //For uppercase A-F letters:
+
+            // For uppercase A-F letters:
             return val - (val < 58 ? 48 : 55);
         }
+
+
     }
 }
