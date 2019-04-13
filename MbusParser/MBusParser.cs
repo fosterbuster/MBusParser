@@ -90,7 +90,7 @@ namespace MBus
             // Todo find out whats wrong with this.
             if(header.ExtendedLinkLayer != null)
             {
-                payloadBody = payload.Skip(header.PayloadStartsAtIndex + 7).ToList();
+                payloadBody = payload.Skip(header.PayloadStartsAtIndex - 2).ToList();
             }
             else
             {
@@ -102,6 +102,7 @@ namespace MBus
             {
                 payloadBody = DecryptPayload(header, payloadBody, decryptionKey);
             }
+
 
             if (header.ExtendedLinkLayer != null)
             {
@@ -116,12 +117,17 @@ namespace MBus
                 payloadBody = payloadBody.Skip(1).ToList();
             }
 
+            while(payloadBody.Last() == 0x2F)
+            {
+                payloadBody.RemoveAt(payloadBody.Count() - 1);
+            }
+
             var list = new List<VariableDataRecord>();
 
             // MBus has a maximum length of 255.
             byte indexer = 0;
 
-            while (indexer <= payloadBody.Count)
+            while (indexer < payloadBody.Count)
             {
                 var difFieldByte = payloadBody[indexer++];
 
@@ -170,6 +176,7 @@ namespace MBus
 
                                 break;
                             default:
+                                extension = new UnknownValueInformationExtensionField(payloadBody[indexer++]);
                                 break;
                         }
                     }

@@ -5,11 +5,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using MBus.DataRecord.DataRecordHeader;
 using MBus.DataRecord.DataRecordHeader.DataInformationBlock;
 using MBus.DataRecord.DataRecordHeader.ValueInformationBlock;
 using MBus.DataRecord.DataRecordHeader.ValueInformationBlock.Extension;
+using MBus.Extensions;
 
 namespace MBus.DataRecord
 {
@@ -69,7 +71,7 @@ namespace MBus.DataRecord
 
         private Unit FindUnit()
         {
-            var lastVife = ValueInformationFieldExtensions.LastOrDefault( x => x.Unit != Unit.None);
+            var lastVife = ValueInformationFieldExtensions.LastOrDefault(x => x.Unit != Unit.None);
 
             if (lastVife != null && lastVife.Unit != Unit.None)
             {
@@ -118,7 +120,7 @@ namespace MBus.DataRecord
 
         private DateTime ParseDateTime()
         {
-            throw new NotImplementedException();
+            return DateTime.MinValue;
         }
 
         private string ParseString(int multiplier)
@@ -128,17 +130,16 @@ namespace MBus.DataRecord
 
         private double ParseBCD(int multiplier)
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         private float ParseReal(int multiplier)
         {
-            throw new NotImplementedException();
+            return 0;
         }
 
         private double ParseInteger(int multiplier)
         {
-            long value = 0;
             var correctEndianData = _data;
 
             // MBus is least significant byte first
@@ -146,29 +147,29 @@ namespace MBus.DataRecord
             {
                 correctEndianData = correctEndianData.Reverse().ToArray();
             }
-
-            switch (DataInformationField.DataField)
-            {
-                case DataField.EightBitInteger:
-                case DataField.SixteenBitInteger:
-                    value = BitConverter.ToInt16(correctEndianData, 0);
-                    break;
-                case DataField.TwentyFourBitInteger:
-                case DataField.ThirtyTwoBitInteger:
-                    value = BitConverter.ToInt32(correctEndianData, 0);
-                    break;
-                case DataField.FourtyEightBitInteger:
-                case DataField.SixtyFourBitInteger:
-                    value = BitConverter.ToInt64(correctEndianData, 0);
-                    break;
-            }
+            long value = long.Parse(correctEndianData.ToHexString(), NumberStyles.HexNumber);
+            //switch (DataInformationField.DataField)
+            //{
+            //    case DataField.EightBitInteger:
+            //    case DataField.SixteenBitInteger:
+            //        value = BitConverter.ToInt16(correctEndianData, 0);
+            //        break;
+            //    case DataField.TwentyFourBitInteger:
+            //    case DataField.ThirtyTwoBitInteger:
+            //        value = BitConverter.ToInt32(correctEndianData, 0);
+            //        break;
+            //    case DataField.FourtyEightBitInteger:
+            //    case DataField.SixtyFourBitInteger:
+            //        value = BitConverter.ToInt64(correctEndianData, 0);
+            //        break;
+            //}
 
             return value * Math.Pow(10, multiplier);
         }
 
         private ValueDescription FindDecription()
         {
-            var vife = ValueInformationFieldExtensions.LastOrDefault( x=> x.Unit != Unit.None);
+            var vife = ValueInformationFieldExtensions.LastOrDefault(x => x.Unit != Unit.None);
 
 
             if (vife != null && vife is FBValueInformationExtensionField fbVife)

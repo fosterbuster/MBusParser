@@ -33,7 +33,7 @@ namespace MBus.DataRecord.DataRecordHeader.DataInformationBlock
         /// <summary>
         /// 32 bit integer/binary.
         /// </summary>
-        ThirtyTwoBitInteger = 0b1000,
+        ThirtyTwoBitInteger = 0b0100,
 
         /// <summary>
         /// 32 bit real.

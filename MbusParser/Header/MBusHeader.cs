@@ -83,6 +83,13 @@ namespace MBus.Header
                 _serialNumberIndexer = (2, 4);
                 _versionIndexer = (6, 1);
                 _deviceTypeIndexer = (7, 1);
+
+                if(HeaderType == HeaderType.Short)
+                {
+                    _accessNumberIndexer = (9, 1);
+                    // todo status
+                    _configurationIndexer = (11, 2);
+                }
             }
             else if (HeaderType == HeaderType.Long)
             {
@@ -141,7 +148,7 @@ namespace MBus.Header
         internal bool IsWireless = false;
 
         // + 1 is to take the CI-field into account.
-        internal int PayloadStartsAtIndex => _bytesBeforeHeader + HeaderLength;
+        internal int PayloadStartsAtIndex => IsWireless ? _bytesBeforeHeader + HeaderLength + 9 : _bytesBeforeHeader + HeaderLength;
 
         private string GetManufacturerName()
         {
@@ -160,12 +167,7 @@ namespace MBus.Header
                 return ExtendedLinkLayer.SessionNumberField.EncryptionScheme;
             }
 
-            if (HeaderType == HeaderType.Long)
-            {
-
-            }
-
-            return EncryptionScheme.NoEncryption;
+            return Configuration.EncryptionScheme;
         }
     }
 }

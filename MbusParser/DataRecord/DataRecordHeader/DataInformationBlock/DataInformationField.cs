@@ -30,7 +30,7 @@ namespace MBus.DataRecord.DataRecordHeader.DataInformationBlock
         /// <summary>
         /// Gets a value indicating the encoding of the data.
         /// </summary>
-        public DataField DataField => (DataField)FieldByte.Mask(DataFieldMask).ShiftRight(1);
+        public DataField DataField => (DataField)FieldByte.Mask(DataFieldMask);
 
         /// <summary>
         /// Gets a value indicating the function of the data.
@@ -59,31 +59,33 @@ namespace MBus.DataRecord.DataRecordHeader.DataInformationBlock
                 case DataField.NoData:
                     return 0;
                 case DataField.EightBitInteger:
-                    return 8 / 4;
+                    return 8 / 8;
                 case DataField.SixteenBitInteger:
-                    return 16 / 4;
+                    return 16 / 8;
                 case DataField.TwentyFourBitInteger:
-                    return 24 / 4;
+                    return 24 / 8;
                 case DataField.ThirtyTwoBitInteger:
-                    return 32 / 4;
+                    return 32 / 8;
                 case DataField.ThirtyTwoBitReal:
-                    return 32 / 4;
+                    return 32 / 8;
                 case DataField.FourtyEightBitInteger:
-                    return 48 / 4;
+                    return 48 / 8;
                 case DataField.SixtyFourBitInteger:
-                    return 64 / 4;
+                    return 64 / 8;
                 case DataField.TwoDigitBinaryCodedDecimal:
-                    return 2;
+                    return 1;
                 case DataField.FourDigitBinaryCodedDecimal:
-                    return 4;
+                    return 2;
                 case DataField.SixDigitBinaryCodedDecimal:
-                    return 6;
+                    return 3;
                 case DataField.EightDigitBinaryCodedDecimal:
-                    return 8;
+                    return 4;
                 case DataField.TwelveDigitBinaryCodedDecimal:
-                    return 12;
+                    return 6;
                 case DataField.VariableLength:
+                    return -1;
                 case DataField.SpecialFunctions:
+                    return -1;
                 default:
                     return null;
             }

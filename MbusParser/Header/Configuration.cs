@@ -14,9 +14,9 @@ namespace MBus.Header
             _bytes = bytes ?? throw new ArgumentNullException(nameof(bytes));
         }
 
-        public byte NumberOfEncryptedBlocks => GetNumberOfEncryptedBlocks(_bytes[1]);
+        public byte NumberOfEncryptedBlocks => GetNumberOfEncryptedBlocks(_bytes[0]);
 
-        public EncryptionScheme EncryptionScheme => GetEncryptionScheme(_bytes[0]);
+        public EncryptionScheme EncryptionScheme => GetEncryptionScheme(_bytes[1]);
 
         private byte GetNumberOfEncryptedBlocks(byte b)
         {
@@ -34,12 +34,15 @@ namespace MBus.Header
 
         private EncryptionScheme GetEncryptionScheme(byte encryptionSchemeByte)
         {
-            var enc = encryptionSchemeByte.ShiftRight(5).Mask(0b0000_0111);
+            var enc = encryptionSchemeByte.GetLowNibble();
 
             switch (enc)
             {
                 case 0b0000_0000: return EncryptionScheme.NoEncryption;
                 case 0b0000_0001: return EncryptionScheme.AesCtr;
+                case 0b0000_0011: return EncryptionScheme.DesCbcIvIsZero;
+                case 0b0000_0100: return EncryptionScheme.DesCbc;
+                case 0b0000_0101: return EncryptionScheme.AesCbc;
             }
 
             return EncryptionScheme.Unknown;
