@@ -134,6 +134,16 @@ namespace MBus.Extensions
             return (b & (1 << bitNumber)) != 0;
         }
 
+        public static byte GetHighNibble(this byte b)
+        {
+            return b.ShiftRight(4).Mask(0b0000_1111);
+        }
+
+        public static int GetLowNibble(this byte b)
+        {
+            return b.Mask(0b0000_1111);
+        }
+
         private static int GetHexVal(char hex)
         {
             var val = (int)hex;

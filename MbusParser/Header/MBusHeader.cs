@@ -22,59 +22,80 @@ namespace MBus.Header
         private readonly IList<byte> _payload;
 
         private readonly byte _ciFieldByte;
+        private readonly bool _isWireless = false;
+
+        private readonly int _bytesBeforeHeader;
 
         private (int startIndex, int length) _manufacturerIndexer;
         private (int startIndex, int length) _serialNumberIndexer;
         private (int startIndex, int length) _versionIndexer;
         private (int startIndex, int length) _deviceTypeIndexer;
-        private (int startIndex, int length) _controlInformationFieldIndexer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MBusHeader"/> class.
         /// </summary>
         /// <param name="payload">the paylod bytes.</param>
-        public MBusHeader(IList<byte> payload, bool messageLenghtIsFirstByte = false)
+        public MBusHeader(IList<byte> payload, bool controlFieldIsFirstByte)
         {
             _payload = payload;
-            _controlInformationFieldIndexer = (0, 1);
 
-            bool isWireless = payload[0] != WiredMBusStartByte && payload[3] != WiredMBusStartByte;
-            if (isWireless)
+            if (!controlFieldIsFirstByte)
             {
-                BytesBeforeHeader = 1;
-                _manufacturerIndexer = (3, 2);
-                _serialNumberIndexer = (5, 8);
-                _versionIndexer = (9, 1);
-                _deviceTypeIndexer = (10, 1);
+                _isWireless = payload[0] != WiredMBusStartByte && payload[3] != WiredMBusStartByte;
+            }
+
+            if (controlFieldIsFirstByte)
+            {
+                _ciFieldByte = _payload[2];
+                _bytesBeforeHeader = 3;
+            }
+            else if (_isWireless)
+            {
+                _ciFieldByte = _payload[10];
+                _bytesBeforeHeader = 11;
             }
             else
             {
-                if (messageLenghtIsFirstByte)
-                {
-                    BytesBeforeHeader = 1;
-                }
-                else
-                {
-                    BytesBeforeHeader = 6;
-                }
-
-                _manufacturerIndexer = (5, 2);
-                _serialNumberIndexer = (1, 4);
-                _versionIndexer = (7, 1);
-                _deviceTypeIndexer = (8, 1);
+                _ciFieldByte = _payload[6];
+                _bytesBeforeHeader = 7;
             }
 
-            _payload = _payload.Skip(BytesBeforeHeader).ToList();
-            _ciFieldByte = _payload.Skip(_controlInformationFieldIndexer.startIndex).Take(_controlInformationFieldIndexer.length).First();
+            _payload = _payload.Skip(_bytesBeforeHeader).ToList();
+
+            ConfigureIndexers();
 
             if (HeaderType == HeaderType.ExtendedLinkLayer)
             {
                 // Skips CI-field
-                ExtendedLinkLayer = new ExtendedLinkLayer(_payload.Skip(1).Take(HeaderLength).ToArray());
+                ExtendedLinkLayer = new ExtendedLinkLayer(_payload.Take(HeaderLength).ToArray());
             }
         }
 
-        internal ExtendedLinkLayer? ExtendedLinkLayer { get; private set; }
+        private void ConfigureIndexers()
+        {
+            if (_isWireless)
+            {
+                _manufacturerIndexer = (0, 2);
+                _serialNumberIndexer = (2, 4);
+                _versionIndexer = (6, 1);
+                _deviceTypeIndexer = (7, 1);
+            }
+            else
+            {
+                if (HeaderType == HeaderType.Long)
+                {
+                    _serialNumberIndexer = (0, 4);
+                    _manufacturerIndexer = (4, 2);
+                    _versionIndexer = (6, 1);
+                    _deviceTypeIndexer = (7, 1);
+
+                }
+                else if (HeaderType == HeaderType.Short)
+                {
+                    throw new NotSupportedException("Short header not supported");
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the manufacturer name.
@@ -106,26 +127,14 @@ namespace MBus.Header
         /// </summary>
         public HeaderType HeaderType => ControlInformationLookup.Find(_ciFieldByte).headerType;
 
+        internal ExtendedLinkLayer? ExtendedLinkLayer { get; private set; }
+
         internal EncryptionScheme EncryptionScheme => GetEncryptionScheme();
-
-        private EncryptionScheme GetEncryptionScheme()
-        {
-            if (ExtendedLinkLayer != null)
-            {
-                return ExtendedLinkLayer.EncryptionScheme;
-            }
-
-
-
-            return EncryptionScheme.NoEncryption;
-        }
 
         internal int HeaderLength => ControlInformationLookup.HeaderLength(_ciFieldByte);
 
-        internal int BytesBeforeHeader { get; private set; }
-
         // + 1 is to take the CI-field into account.
-        internal int PayloadStartsAtIndex => BytesBeforeHeader + HeaderLength + 1;
+        internal int PayloadStartsAtIndex => _bytesBeforeHeader + HeaderLength;
 
         private string GetManufacturerName()
         {
@@ -135,6 +144,21 @@ namespace MBus.Header
         private int GetSerialNumber()
         {
             return BitConverter.ToInt32(_payload.Skip(_serialNumberIndexer.startIndex).Take(_serialNumberIndexer.length).Reverse().ToArray());
+        }
+
+        private EncryptionScheme GetEncryptionScheme()
+        {
+            if (ExtendedLinkLayer != null)
+            {
+                return ExtendedLinkLayer.EncryptionScheme;
+            }
+
+            if (HeaderType == HeaderType.Long)
+            {
+
+            }
+
+            return EncryptionScheme.NoEncryption;
         }
     }
 }

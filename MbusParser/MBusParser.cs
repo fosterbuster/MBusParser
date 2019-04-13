@@ -24,9 +24,9 @@ namespace MBus
         /// </summary>
         /// <param name="payload">the payload.</param>
         /// <returns>the mbus header.</returns>
-        public MBusHeader ParseHeader(IList<byte> payload)
+        public MBusHeader ParseHeader(IList<byte> payload, bool controlFieldIsFirstByte = false)
         {
-            return new MBusHeader(payload);
+            return new MBusHeader(payload, controlFieldIsFirstByte);
         }
 
         /// <summary>
@@ -78,7 +78,7 @@ namespace MBus
         /// <returns>a IList<MbusRecord> containing the parse records.</returns>
         private IList<VariableDataRecord> ParseRecords(MBusHeader header, IList<byte> payload, IList<byte>? decryptionKey, IList<byte>? initializationVector)
         {
-            var payloadBody = payload.Skip(header.BytesBeforeHeader + header.HeaderLength + 1).ToList();
+            var payloadBody = payload.Skip(header.PayloadStartsAtIndex).ToList();
 
             if (decryptionKey != null)
             {
