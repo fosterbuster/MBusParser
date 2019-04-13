@@ -10,7 +10,6 @@
 
 ## TODO:
 
-- Handle endianess of the platform where the parser is running.
 - Write tests.
 - Check if wireless mbus header is parsed correctly.
 - Handle decryption (coming soon!)
