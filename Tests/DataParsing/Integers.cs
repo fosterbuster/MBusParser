@@ -71,17 +71,6 @@ namespace Tests.DataParsing
         }
 
         [Fact]
-        public void CanParseThirtyTwoBitReal()
-        {
-            var dif = "05"; // 32 bit
-            var data = "00 00 00 01"; // 1
-
-            var result = ParseValue<float>(dif, data);
-
-            Assert.Equal(1, result);
-        }
-
-        [Fact]
         public void CanParseFourtyEightBitInteger()
         {
             var dif = "06"; // 48 bit
@@ -102,6 +91,72 @@ namespace Tests.DataParsing
             var result = ParseValue<double>(dif, data);
 
             Assert.Equal(1, result);
+        }
+
+        [Fact]
+        public void CanParseThirtyTwoBitReal()
+        {
+            var dif = "05"; // 32 bit
+            var data = "00 00 00 01"; // 1
+
+            var result = ParseValue<float>(dif, data);
+
+            Assert.Equal(1, result);
+        }
+
+        [Fact]
+        public void CanParse2DigitBCD()
+        {
+            var dif = "09"; // 32 bit
+            var data = "12"; // 12
+
+            var result = ParseValue<double>(dif, data);
+
+            Assert.Equal(12, result);
+        }
+
+        [Fact]
+        public void CanParse4DigitBCD()
+        {
+            var dif = "0A"; // 32 bit
+            var data = "3412"; // 1234
+
+            var result = ParseValue<double>(dif, data);
+
+            Assert.Equal(1234, result);
+        }
+
+        [Fact]
+        public void CanParse6DigitBCD()
+        {
+            var dif = "0B"; // 32 bit
+            var data = "563412"; // 123456
+
+            var result = ParseValue<double>(dif, data);
+
+            Assert.Equal(123456, result);
+        }
+
+        [Fact]
+        public void CanParse8DigitBCD()
+        {
+            var dif = "0C"; // 32 bit
+            var data = "78563412"; // 12345678
+
+            var result = ParseValue<double>(dif, data);
+
+            Assert.Equal(12345678, result);
+        }
+
+        [Fact]
+        public void CanParse12DigitBCD()
+        {
+            var dif = "0E"; // 32 bit
+            var data = "009178563412"; // 12345678910
+
+            var result = ParseValue<double>(dif, data);
+
+            Assert.Equal(123456789100, result);
         }
 
         private byte[] GetBytes(string dif, string data)

@@ -130,7 +130,7 @@ namespace MBus.DataRecord
 
         private double ParseBCD(int multiplier)
         {
-            return 0;
+            return long.Parse(_data.Reverse().ToArray().ToHexString()) * Math.Pow(10, multiplier);
         }
 
         private float ParseReal(int multiplier)
