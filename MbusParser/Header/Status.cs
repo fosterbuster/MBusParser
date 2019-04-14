@@ -6,7 +6,7 @@ using System.Text;
 
 namespace MBus.Header
 {
-    public class Status
+    public sealed class Status
     {
         private readonly byte _statusByte;
 

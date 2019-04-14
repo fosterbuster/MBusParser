@@ -18,7 +18,7 @@ namespace MBus.DataRecord
     /// <summary>
     /// An mbus datablock.
     /// </summary>
-    public class DataBlock
+    public sealed class DataBlock
     {
         public Unit Unit { get; private set; }
 
@@ -130,41 +130,34 @@ namespace MBus.DataRecord
 
         private double ParseBCD(int multiplier)
         {
-            return 0;
+            return long.Parse(_data.Reverse().ToArray().ToHexString()) * Math.Pow(10, multiplier);
         }
 
         private float ParseReal(int multiplier)
         {
-            return 0;
+            return Convert.ToSingle(ValueAsLong() * Math.Pow(10, multiplier));
         }
 
         private double ParseInteger(int multiplier)
         {
-            var correctEndianData = _data;
+            return ValueAsLong() * Math.Pow(10, multiplier);
+        }
 
-            // MBus is least significant byte first
-            if (BitConverter.IsLittleEndian)
+        private long ValueAsLong()
+        {
+            var length = _data.Length;
+
+            switch (length)
             {
-                correctEndianData = correctEndianData.Reverse().ToArray();
-            }
-            long value = long.Parse(correctEndianData.ToHexString(), NumberStyles.HexNumber);
-            //switch (DataInformationField.DataField)
-            //{
-            //    case DataField.EightBitInteger:
-            //    case DataField.SixteenBitInteger:
-            //        value = BitConverter.ToInt16(correctEndianData, 0);
-            //        break;
-            //    case DataField.TwentyFourBitInteger:
-            //    case DataField.ThirtyTwoBitInteger:
-            //        value = BitConverter.ToInt32(correctEndianData, 0);
-            //        break;
-            //    case DataField.FourtyEightBitInteger:
-            //    case DataField.SixtyFourBitInteger:
-            //        value = BitConverter.ToInt64(correctEndianData, 0);
-            //        break;
-            //}
-
-            return value * Math.Pow(10, multiplier);
+                case 1: return _data[0];
+                case 2: return BitConverter.ToInt16(_data.Reverse().ToArray(), 0);
+                case 3: return BitConverter.ToInt32(new byte[1].Concat(_data).Reverse().ToArray(), 0);
+                case 4: return BitConverter.ToInt32(_data.Reverse().ToArray(), 0);
+                case 6: return BitConverter.ToInt64(new byte[2].Concat(_data).Reverse().ToArray(), 0);
+                case 8: return BitConverter.ToInt64(_data.Reverse().ToArray(), 0);
+                default:
+                    throw new InvalidOperationException(":(");
+            } 
         }
 
         private ValueDescription FindDecription()

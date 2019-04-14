@@ -9,7 +9,7 @@ namespace MBus.DataRecord
     /// <summary>
     /// An MBus DataRecord.
     /// </summary>
-    public class VariableDataRecord
+    public sealed class VariableDataRecord
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="VariableDataRecord"/> class.

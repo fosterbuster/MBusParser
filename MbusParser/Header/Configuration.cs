@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MBus.Header
 {
-    public class Configuration
+    public sealed class Configuration
     {
         private readonly byte[] _bytes;
 
