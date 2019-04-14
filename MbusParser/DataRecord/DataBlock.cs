@@ -18,7 +18,7 @@ namespace MBus.DataRecord
     /// <summary>
     /// An mbus datablock.
     /// </summary>
-    public class DataBlock
+    public sealed class DataBlock
     {
         public Unit Unit { get; private set; }
 

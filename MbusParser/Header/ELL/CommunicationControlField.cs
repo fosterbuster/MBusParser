@@ -10,7 +10,7 @@ namespace MBus.Header.ELL
     /// <summary>
     /// Contains bits related to communication control. 
     /// </summary>
-    public class CommunicationControlField
+    public sealed class CommunicationControlField
     {
         private readonly byte _ccFieldByte;
 

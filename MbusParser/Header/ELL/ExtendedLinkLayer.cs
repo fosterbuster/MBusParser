@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace MBus.Header.ELL
 {
-    public class ExtendedLinkLayer
+    public sealed class ExtendedLinkLayer
     {
         private readonly byte[] _bytes;
         private readonly byte[] _sessionNumberBytes;

@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Tests
 {
-    public class Header
+    public sealed class Header
     {
         private MBusParser _parser = new MBusParser();
         private static byte[] _kamstrupPayload = "".HexStringToBytes();

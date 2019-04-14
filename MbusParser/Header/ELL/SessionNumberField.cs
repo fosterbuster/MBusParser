@@ -3,7 +3,7 @@ using System;
 
 namespace MBus.Header.ELL
 {
-    public class SessionNumberField
+    public sealed class SessionNumberField
     {
         private readonly byte[] _bytes;
 
