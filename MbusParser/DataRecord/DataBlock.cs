@@ -157,7 +157,7 @@ namespace MBus.DataRecord
                 case 8: return BitConverter.ToInt64(_data.Reverse().ToArray(), 0);
                 default:
                     throw new InvalidOperationException(":(");
-            }
+            } 
         }
 
         private ValueDescription FindDecription()
