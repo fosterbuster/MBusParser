@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Tests.DataParsing
 {
-    public class Integers
+    public class ParseValues
     {
         /*
         * MANUFACTURER:    HST
