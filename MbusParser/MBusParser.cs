@@ -103,6 +103,8 @@ namespace MBus
                 payloadBody = DecryptPayload(header, payloadBody, decryptionKey);
             }
 
+            if (payloadBody == null) return null;
+
 
             if (header.ExtendedLinkLayer != null)
             {
