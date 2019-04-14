@@ -96,7 +96,7 @@ namespace Tests.DataParsing
         [Fact]
         public void CanParseThirtyTwoBitReal()
         {
-            var dif = "05"; // 32 bit
+            var dif = "05"; // 32 bit real
             var data = "00 00 00 01"; // 1
 
             var result = ParseValue<float>(dif, data);
@@ -107,7 +107,7 @@ namespace Tests.DataParsing
         [Fact]
         public void CanParse2DigitBCD()
         {
-            var dif = "09"; // 32 bit
+            var dif = "09";
             var data = "12"; // 12
 
             var result = ParseValue<double>(dif, data);
@@ -118,7 +118,7 @@ namespace Tests.DataParsing
         [Fact]
         public void CanParse4DigitBCD()
         {
-            var dif = "0A"; // 32 bit
+            var dif = "0A";
             var data = "3412"; // 1234
 
             var result = ParseValue<double>(dif, data);
@@ -129,7 +129,7 @@ namespace Tests.DataParsing
         [Fact]
         public void CanParse6DigitBCD()
         {
-            var dif = "0B"; // 32 bit
+            var dif = "0B";
             var data = "563412"; // 123456
 
             var result = ParseValue<double>(dif, data);
@@ -140,7 +140,7 @@ namespace Tests.DataParsing
         [Fact]
         public void CanParse8DigitBCD()
         {
-            var dif = "0C"; // 32 bit
+            var dif = "0C";
             var data = "78563412"; // 12345678
 
             var result = ParseValue<double>(dif, data);
@@ -151,12 +151,11 @@ namespace Tests.DataParsing
         [Fact]
         public void CanParse12DigitBCD()
         {
-            var dif = "0E"; // 32 bit
-            var data = "009178563412"; // 12345678910
-
+            var dif = "0E";
+            var data = "108967452301";// 12345678910
             var result = ParseValue<double>(dif, data);
 
-            Assert.Equal(123456789100, result);
+            Assert.Equal(12345678910, result);
         }
 
         private byte[] GetBytes(string dif, string data)
