@@ -45,17 +45,17 @@ namespace MBus.DataRecord.DataRecordHeader.ValueInformationBlock
             {
                 return baseMultiplier;
             }
-            else if (SetType(FieldByte.Mask(ValueInformationMask)))
+            else if (SetType(FieldByte.Mask(ValueInformationMask).Or(LastThreeBitsMask)))
             {
-                return baseMultiplier;
+                return FieldByte.Mask(ValueInformationMask).Mask(LastThreeBitsMask);
             }
             else if (SetType(FieldByte.Mask(ValueInformationMask).Or(LastTwoBitsMask)))
             {
                 return FieldByte.Mask(ValueInformationMask).Mask(LastTwoBitsMask);
             }
-            else if (SetType(FieldByte.Mask(ValueInformationMask).Or(LastThreeBitsMask)))
+            else if (SetType(FieldByte.Mask(ValueInformationMask)))
             {
-                return FieldByte.Mask(ValueInformationMask).Mask(LastThreeBitsMask);
+                return baseMultiplier;
             }
             else
             {
