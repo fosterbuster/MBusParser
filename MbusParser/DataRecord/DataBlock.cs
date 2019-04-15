@@ -193,10 +193,7 @@ namespace MBus.DataRecord
 
         private double ParseInteger(int multiplier)
         {
-            double value = ValueAsLong();
-            var power = Math.Pow(10, multiplier);
-            value = value * power;
-            return value;
+            return ValueAsLong() * Math.Pow(10, multiplier);
         }
 
         private long ValueAsLong()

@@ -10,7 +10,7 @@ Somewhat fast mbus parser. Uses ~586 ticks per wmbus packet, thats including dec
 
 ## TODO:
 
-- Parse other things than integers
-- Write tests.
+- Parse date and date time.
+- Write more tests.
 - Support more orthogonal value information extensions
 - Ensure correct unit is chosen.

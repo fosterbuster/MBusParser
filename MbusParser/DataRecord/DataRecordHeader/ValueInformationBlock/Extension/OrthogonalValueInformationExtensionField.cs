@@ -35,7 +35,6 @@ namespace MBus.DataRecord.DataRecordHeader.ValueInformationBlock.Extension
         private byte DetermineTypeAndMultiplier()
         {
             byte baseMultiplier = 0;
-
             if (SetType(FieldByte.Mask(ValueInformationMask).Or(LastThreeBitsMask)))
             {
                 return FieldByte.Mask(ValueInformationMask).Mask(LastThreeBitsMask);
