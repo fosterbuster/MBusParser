@@ -66,7 +66,12 @@ namespace MBus.DataRecord
 
         private int FindMultiplier()
         {
-            return ValueInformationField.Multiplier + ValueInformationFieldExtensions.Sum(x => x.Multiplier);
+            if (ValueInformationFieldExtensions.Any())
+            {
+                return ValueInformationFieldExtensions.First().Multiplier;
+            }
+
+            return ValueInformationField.Multiplier;
         }
 
         private Unit FindUnit()
@@ -90,32 +95,80 @@ namespace MBus.DataRecord
                 return ParseDateTime();
             }
 
+            object? value;
             switch (valueType)
             {
-                case DataField.NoData:
-                    return null;
                 case DataField.EightBitInteger:
                 case DataField.SixteenBitInteger:
                 case DataField.TwentyFourBitInteger:
                 case DataField.ThirtyTwoBitInteger:
                 case DataField.FourtyEightBitInteger:
                 case DataField.SixtyFourBitInteger:
-                    return ParseInteger(multiplier);
+                    value = ParseInteger(multiplier);
+                    break;
                 case DataField.ThirtyTwoBitReal:
-                    return ParseReal(multiplier);
+                    value = ParseReal(multiplier);
+                    break;
                 case DataField.TwoDigitBinaryCodedDecimal:
                 case DataField.FourDigitBinaryCodedDecimal:
                 case DataField.SixDigitBinaryCodedDecimal:
                 case DataField.EightDigitBinaryCodedDecimal:
                 case DataField.TwelveDigitBinaryCodedDecimal:
-                    return ParseBCD(multiplier);
+                    value = ParseBCD(multiplier);
+                    break;
                 case DataField.VariableLength:
-                    return ParseString(multiplier);
+                    value = ParseString(multiplier);
+                    break;
                 default:
+                    value = null;
                     break;
             }
 
-            return null;
+            if (ValueInformationFieldExtensions.FirstOrDefault(x => x is OrthogonalValueInformationExtensionField) is OrthogonalValueInformationExtensionField orthogonal)
+            {
+                switch (orthogonal.Type)
+                {
+                    case OrthogonalValueInformationExtension.MultiplicativeCorrectionFactorMinusSix:
+                    case OrthogonalValueInformationExtension.MultiplicativeCorrectionFactorThree:
+                        value = ApplyOrthogonalCorrections(value, orthogonal.Multiplier, isMultiplication: true);
+                        break;
+                    case OrthogonalValueInformationExtension.AdditiveCorrectionConstant:
+                        value = ApplyOrthogonalCorrections(value, orthogonal.Multiplier, isMultiplication: false);
+                        break;
+                }
+            }
+
+            return value;
+        }
+
+        private object? ApplyOrthogonalCorrections(object? value, int multiplier, bool isMultiplication)
+        {
+            if (isMultiplication)
+            {
+                if (value is float floatValue)
+                {
+                    return floatValue * multiplier;
+                }
+
+                if (value is double doubleValue)
+                {
+                    return doubleValue * multiplier;
+                }
+            }
+            else
+            {
+                if (value is float floatValue)
+                {
+                    return floatValue + multiplier;
+                }
+
+                if (value is double doubleValue)
+                {
+                    return doubleValue + multiplier;
+                }
+            }
+
+            return value;
         }
 
         private DateTime ParseDateTime()
@@ -146,18 +199,18 @@ namespace MBus.DataRecord
         private long ValueAsLong()
         {
             var length = _data.Length;
-
+            var correctEndian = _data;
             switch (length)
             {
                 case 1: return _data[0];
-                case 2: return BitConverter.ToInt16(_data.Reverse().ToArray(), 0);
-                case 3: return BitConverter.ToInt32(new byte[1].Concat(_data).Reverse().ToArray(), 0);
-                case 4: return BitConverter.ToInt32(_data.Reverse().ToArray(), 0);
-                case 6: return BitConverter.ToInt64(new byte[2].Concat(_data).Reverse().ToArray(), 0);
-                case 8: return BitConverter.ToInt64(_data.Reverse().ToArray(), 0);
+                case 2: return BitConverter.ToInt16(correctEndian, 0);
+                case 3: return BitConverter.ToInt32(new byte[1].Concat(correctEndian).Reverse().ToArray(), 0);
+                case 4: return BitConverter.ToInt32(correctEndian, 0);
+                case 6: return BitConverter.ToInt64(new byte[2].Concat(correctEndian).Reverse().ToArray(), 0);
+                case 8: return BitConverter.ToInt64(correctEndian, 0);
                 default:
                     throw new InvalidOperationException(":(");
-            } 
+            }
         }
 
         private ValueDescription FindDecription()
